@@ -134,6 +134,6 @@ GO
 --18.
 CREATE VIEW B18 AS
 SELECT FROM 
-GO
+GO 
 
 select * from B17
