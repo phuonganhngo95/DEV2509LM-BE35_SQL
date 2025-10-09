@@ -1,0 +1,139 @@
+﻿USE QLSINHVIEN
+GO
+
+--Bài 1
+--1.
+CREATE VIEW B1 AS
+SELECT CONCAT(HoSV, ' ', TenSV) AS HoTen, MaKH, NoiSinh, HocBong 
+FROM SinhVien
+WHERE HocBong > 100000 AND NoiSinh = N'Tp.HCM'
+GO
+
+--2.
+CREATE VIEW B2 AS
+SELECT MaSV, MaKH, IIF(Phai=0, N'Nam', N'Nữ') AS Phai
+FROM SinhVien
+WHERE MaKH='AV' OR MaKH='TR'
+GO
+
+--3.
+CREATE VIEW B3 AS
+SELECT MaSV, NgaySinh, NoiSinh, HocBong 
+FROM SinhVien 
+WHERE NgaySinh BETWEEN '1986-01-01' AND '1992-06-05'
+GO
+
+--4.
+CREATE VIEW B4 AS
+SELECT MaSV, NgaySinh, IIF(Phai=0, N'Nam', N'Nữ') AS Phai, MaKH
+FROM SinhVien
+WHERE HocBong BETWEEN 200000 AND 800000
+GO
+
+--5.
+CREATE VIEW B5 AS
+SELECT MaMH, TenMH, Sotiet
+FROM MonHoc
+WHERE Sotiet>40 AND Sotiet<60
+GO
+
+--6.
+CREATE VIEW B6 AS
+SELECT MaSV, CONCAT(HoSV, ' ', TenSV) AS HoTen, IIF(Phai=0, N'Nam', N'Nữ') AS Phai
+FROM SinhVien
+WHERE Phai=0 AND MaKH = 'AV'
+GO
+
+--7.
+CREATE VIEW B7 AS
+SELECT CONCAT(HoSV, ' ', TenSV) AS HoTen, NoiSinh, NgaySinh
+FROM SinhVien
+WHERE NgaySinh>'1990-01-01' AND NoiSinh=N'Hà Nội'
+GO
+
+--8.
+CREATE VIEW B8 AS
+SELECT *
+FROM SinhVien
+WHERE Phai=1 AND TenSV LIKE '%N%'
+GO
+
+--9.
+CREATE VIEW B9 AS
+SELECT *
+FROM SinhVien
+WHERE MaKH='TH' AND NgaySinh>'1986-05-30'
+GO
+
+--10.
+CREATE VIEW B10 AS
+SELECT CONCAT(HoSV, ' ', TenSV) AS HoTen,
+IIF(Phai=0, N'Nam', N'Nữ') AS Phai, NgaySinh
+FROM SinhVien
+GO
+
+--11.
+CREATE VIEW B11 AS
+SELECT MaSV, YEAR(GETDATE())-YEAR(NgaySinh) AS Tuoi, NoiSinh, MaKH
+FROM SinhVien
+GO
+
+--12.
+CREATE VIEW B12 AS
+SELECT CONCAT(SV.HoSV, ' ', SV.TenSV) AS HoTen,
+YEAR(GETDATE())-YEAR(SV.NgaySinh) AS Tuoi, KH.TenKH
+FROM SinhVien SV
+JOIN Khoa KH ON KH.MaKH = SV.MaKH
+WHERE YEAR(GETDATE())-YEAR(SV.NgaySinh) BETWEEN 20 AND 30
+GO
+
+--13.
+CREATE VIEW B13 AS
+SELECT MaSV, IIF(Phai=0, N'Nam', N'Nữ') AS Phai, MaKH,
+IIF(HocBong>500000, N'Học bổng cao', N'Mức trung bình') AS HocBong
+FROM SinhVien 
+GO
+
+--14.
+CREATE VIEW B14 AS
+SELECT CONCAT(SV.HoSV, ' ', SV.TenSV) AS HoTen,
+IIF(SV.Phai=0, N'Nam', N'Nữ') AS Phai, KH.TenKH
+FROM SinhVien SV
+JOIN Khoa KH ON KH.MaKH = SV.MaKH
+WHERE KH.TenKH = N'Anh Văn'
+GO
+
+--15.
+CREATE VIEW B15 AS
+SELECT KH.TenKH, CONCAT(SV.HoSV, ' ', SV.TenSV) AS HoTen, MH.TenMH, MH.SoTiet, KQ.Diem
+FROM Ketqua KQ
+JOIN MonHoc MH ON MH.MaMH = KQ.MaMH
+JOIN SinhVien SV ON SV.MaSV = KQ.MaSV
+JOIN Khoa KH ON KH.MaKH = SV.MaKH
+WHERE KH.TenKH = N'Tin học'
+GO
+
+--16.
+CREATE VIEW B16 AS
+SELECT CONCAT(SV.HoSV, ' ', SV.TenSV) AS HoTen, KH.MaKH, MH.TenMH, KQ.Diem,
+IIF(KQ.Diem>8, N'Giỏi', IIF(KQ.Diem>=6 AND KQ.Diem<=8, N'Khá', N'Trung bình')) AS Loai
+FROM Ketqua KQ
+JOIN SinhVien SV ON SV.MaSV = KQ.MaSV
+JOIN Khoa KH ON KH.MaKH = SV.MaKH
+JOIN MonHoc MH ON MH.MaMH = KQ.MaMH
+GO
+
+--17.
+CREATE VIEW B17 AS
+SELECT KH.TenKH, MAX(SV.HocBong) AS HocBongMax
+FROM SinhVien SV
+JOIN Khoa KH ON KH.MaKH = SV.MaKH
+GROUP BY KH.TenKH
+GO
+
+--18.
+CREATE VIEW B18 AS
+SELECT FROM 
+GO
+
+select * from B17
