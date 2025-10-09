@@ -1,10 +1,10 @@
-﻿CREATE DATABASE QLSINHVIEN
+CREATE DATABASE QLSINHVIEN
 --ON PRIMARY
 --(
 --    NAME = QLSINHVIEN_Data,
 --    FILENAME = 'D:\00.DATABASE\QLSINHVIEN.mdf',
 --    SIZE = 10MB,
---    MAXSIZE = UNLIMITED,
+--    MAXSIZE = UNLIMITED, 
 --    FILEGROWTH = 10%
 --)
 --LOG ON
@@ -331,3 +331,673 @@ FROM SinhVien SV
 INNER JOIN Khoa K ON SV.MaKH = K.MaKH
 WHERE YEAR(GETDATE()) - YEAR(SV.NgaySinh) BETWEEN 20 AND 30
 GO
+
+--Bài 2
+--1.
+SELECT HoSV + N' ' + TenSV AS N'Họ và tên',
+	CASE WHEN Phai=0 THEN N'Nam' ELSE N'Nữ' END AS N'Giới tính',
+	DATEDIFF(YEAR, NgaySinh, GETDATE()) AS N'Tuổi', MaKH
+FROM SinhVien
+ORDER BY DATEDIFF(YEAR, NgaySinh, GETDATE()) DESC
+
+--2.
+SELECT HoSV + N' ' + TenSV AS N'Họ và tên', 
+CASE WHEN Phai=0 THEN N'Nam' ELSE N'Nữ' END AS N'Giới tính',
+<<<<<<< Updated upstream
+DAY(NgaySinh) AS N'Ngày sinh'
+FROM SinhVien
+WHERE MONTH(NgaySinh)=2
+=======
+DAY(NgaySinh) AS NgaySinh
+FROM SinhVien
+WHERE MONTH(NgaySinh)=2 AND YEAR(NgaySinh) = 1994
+GO
+
+--Chữa
+SELECT [HoSV] + N'' + [TenSV] AS N'Họ và tên',
+[Phai], [NgaySinh]
+FROM SinhVien
+WHERE [NgaySinh] BETWEEN '19940201' AND '19940228'
+>>>>>>> Stashed changes
+GO
+
+--3.
+SELECT * FROM SinhVien
+ORDER BY NgaySinh DESC
+GO
+
+--4.
+SELECT MaSV,
+IIF(Phai=0, N'Nam', N'Nữ') AS Phai, MaKH,
+IIF(HocBong>500000, N'Học bổng cao', N'Mức trung bình')
+FROM SinhVien
+GO
+
+--5.
+SELECT CONCAT(SV.HoSV, ' ', SV.TenSV) AS HoTen, KQ.MaMH, KQ.Diem
+FROM Ketqua KQ
+JOIN SinhVien SV ON KQ.MaSV = SV.MaSV
+ORDER BY SV.TenSV ASC, MaMH ASC
+GO
+
+--6.
+SELECT CONCAT(SV.HoSV, ' ', SV.TenSV) AS HoTen,
+IIF(SV.Phai=0, N'Nam', N'Nữ') AS Phai, KH.TenKH
+FROM SinhVien SV
+JOIN Khoa KH ON KH.MaKH = SV.MaKH
+WHERE KH.TenKH = N'anh văn'
+GO
+
+--7.
+SELECT KH.TenKH, CONCAT(SV.HoSV, ' ', SV.TenSV) AS HoTen, MH.TenMH, MH.SoTiet, KQ.Diem
+FROM Ketqua KQ
+JOIN SinhVien SV ON SV.MaSV = KQ.MaSV
+JOIN Khoa KH ON KH.MaKH = SV.MaKH
+JOIN MonHoc MH ON MH.MaMH = KQ.MaMH
+WHERE KH.TenKH = N'tin học'
+GO
+
+--8.
+SELECT CONCAT(SV.HoSV, ' ', SV.TenSV) AS HoTen, SV.MaKH, MH.TenMH, KQ.Diem,
+IIF(KQ.Diem>8, N'Giỏi', IIF(KQ.Diem>=6 AND KQ.Diem<=8, N'Khá', N'Trung bình')) AS Loai
+FROM Ketqua KQ
+JOIN SinhVien SV ON SV.MaSV = KQ.MaSV
+JOIN MonHoc MH ON MH.MaMH = KQ.MaMH
+GO
+
+--Bài 3
+--1.
+SELECT KQ.MaMH, MH.TenMH, AVG(KQ.Diem) FROM Ketqua KQ
+JOIN MonHoc MH ON MH.MaMH = KQ.MaMH
+--WHERE TenMH LIKE 'T%'
+GROUP BY KQ.MaMH, MH.TenMH
+--HAVING AVG(KQ.Diem) > 5
+ORDER BY KQ.MaMH
+GO
+
+--2.
+SELECT CONCAT(SV.HoSV, ' ', SV.TenSV) AS HoTen, KH.TenKH, 
+COUNT(MH.MaMH) AS Tong
+FROM SinhVien SV
+JOIN Ketqua KQ ON KQ.MaSV = SV.MaSV
+JOIN MonHoc MH ON MH.MaMH = KQ.MaMH
+JOIN Khoa KH ON KH.MaKH = SV.MaKH
+GROUP BY CONCAT(SV.HoSV, ' ', SV.TenSV), KH.TenKH
+GO
+
+--3.
+SELECT SV.TenSV, KH.TenKH,
+IIF(SV.Phai=0, N'Nam', N'Nữ') AS Phai, SUM(KQ.Diem) AS Tong
+FROM SinhVien SV
+JOIN Ketqua KQ ON KQ.MaSV = SV.MaSV
+JOIN Khoa KH ON KH.MaKH = SV.MaKH
+<<<<<<< Updated upstream
+JOIN MonHoc MH ON MH.MaMH = KQ.MaMH
+GROUP BY SV.TenSV, KH.TenKH, IIF(SV.Phai=0, N'Nam', N'Nữ')
+GO
+
+=======
+GROUP BY SV.TenSV, KH.TenKH, IIF(SV.Phai=0, N'Nam', N'Nữ')
+GO
+
+--Chữa
+SELECT MaSV, SUM(Diem) AS Dtb FROM Ketqua GROUP BY MaSV
+SELECT SV.TenSV, KH.TenKH,
+IIF(SV.Phai=0, N'Nam', N'Nữ') AS Phai
+FROM SinhVien SV
+JOIN Khoa KH ON KH.MaKH = SV.MaKH
+JOIN (SELECT MaSV, SUM(Diem) AS Dtb FROM Ketqua GROUP BY MaSV) KQ ON SV.MaSV = KQ.MaSV
+GO
+
+SELECT SV.TenSV, KH.TenKH, SV.Phai,
+ISNULL((SELECT SUM(Diem) AS Dtb FROM Ketqua KQ 
+WHERE KQ.MaSV = SV.MaSV
+GROUP BY MaSV), 0) AS Dtb
+FROM SinhVien SV
+JOIN Khoa KH ON KH.MaKH = SV.MaKH
+GO
+
+>>>>>>> Stashed changes
+--4.
+SELECT KH.TenKH, COUNT(SV.MaSV) AS Tong
+FROM SinhVien SV
+JOIN Khoa KH ON KH.MaKH = SV.MaKH
+GROUP BY KH.TenKH
+GO
+
+--5.
+SELECT CONCAT(HoSV, ' ', TenSV) AS HoTen, MAX(Diem) AS DiemMax
+FROM SinhVien SV
+JOIN Ketqua KQ ON KQ.MaSV = SV.MaSV
+GROUP BY CONCAT(HoSV, ' ', TenSV)
+GO
+
+--6.
+SELECT TenMH, Sotiet SoTietMax
+FROM MonHoc
+WHERE Sotiet = (SELECT MAX(Sotiet) FROM MonHoc)
+GO
+
+<<<<<<< Updated upstream
+=======
+--Chữa
+SELECT TOP(1) WITH TIES TenMH, Sotiet SoTietMax
+FROM MonHoc
+ORDER BY Sotiet DESC
+GO
+
+>>>>>>> Stashed changes
+--7.
+SELECT KH.MaKH, KH.TenKH, MAX(SV.HocBong) AS HocBongMax 
+FROM Khoa KH
+JOIN SinhVien SV ON SV.MaKH = KH.MaKH
+GROUP BY KH.MaKH, KH.TenKH
+GO
+
+<<<<<<< Updated upstream
+=======
+--Chữa
+SELECT KH.MaKH, KH.TenKH, HocBongMax FROM Khoa KH
+INNER JOIN (SELECT MaKH, MAX(HocBong) AS HocBongMax FROM SinhVien
+			GROUP BY MaKH) AS HB ON HB.MaKH = KH.MaKH
+GO
+
+>>>>>>> Stashed changes
+--8.
+SELECT MH.TenMH, MAX(KQ.Diem) AS DiemMax FROM MonHoc MH
+JOIN Ketqua KQ ON KQ.MaMH = MH.MaMH
+GROUP BY MH.TenMH
+GO
+
+--9.
+SELECT MH.MaMH, MH.TenMH, COUNT(SV.MaSV) AS Sv
+FROM SinhVien SV
+JOIN Ketqua KQ ON KQ.MaSV = SV.MaSV
+JOIN MonHoc MH ON MH.MaMH = KQ.MaMH
+GROUP BY MH.MaMH, MH.TenMH
+GO
+
+--10.
+SELECT MH.TenMH, MH.SoTiet, SV.TenSV, KQ.Diem AS DiemMax
+FROM Ketqua KQ
+JOIN MonHoc MH ON MH.MaMH = KQ.MaMH
+JOIN SinhVien SV ON SV.MaSV = KQ.MaSV
+WHERE KQ.Diem = (SELECT MAX(Diem) FROM Ketqua)
+GO
+
+--11.
+SELECT TOP(1) KH.MaKH, KH.TenKH, COUNT(SV.MaSV) AS Tong FROM Khoa KH
+JOIN SinhVien SV ON SV.MaKH = KH.MaKH
+GROUP BY KH.MaKH, KH.TenKH
+GO
+
+--12.
+SELECT KH.TenKH, CONCAT(SV.HoSV, ' ', SV.TenSV) AS HoTen, SV.HocBong 
+FROM Khoa KH
+JOIN SinhVien SV ON SV.MaKH = KH.MaKH
+WHERE SV.HocBong = (SELECT MAX(HocBong) FROM SinhVien) 
+GO
+
+--13.
+SELECT TOP(1) SV.MaSV, CONCAT(SV.HoSV, ' ', SV.TenSV) AS HoTen, KH.TenKH, SV.HocBong
+FROM SinhVien SV
+JOIN Khoa KH ON KH.MaKH = SV.MaKH
+WHERE KH.TenKH = N'tin học'
+ORDER BY SV.HocBong DESC
+GO
+
+--14.
+SELECT TOP(1) CONCAT(SV.HoSV, ' ', SV.TenSV) AS HoTen, MH.TenMH, KQ.Diem
+FROM SinhVien SV
+JOIN Ketqua KQ ON KQ.MaSV = SV.MaSV
+JOIN MonHoc MH ON MH.MaMH = KQ.MaMH
+WHERE MH.TenMH = N'cơ sở dữ liệu'
+ORDER BY KQ.Diem DESC
+GO
+
+--15.
+SELECT TOP(3) CONCAT(SV.HoSV, ' ', SV.TenSV) AS HoTen, KH.TenKH, MH.TenMH, KQ.Diem
+FROM SinhVien SV
+JOIN Ketqua KQ ON KQ.MaSV = SV.MaSV
+JOIN Khoa KH ON SV.MaKH = KH.MaKH
+JOIN MonHoc MH ON MH.MaMH = KQ.MaMH
+WHERE MH.TenMH = N'đồ họa ứng dụng'
+ORDER BY KQ.Diem ASC
+GO
+
+--16.
+SELECT TOP(1) KH.MaKH, KH.TenKH
+FROM Khoa KH
+JOIN SinhVien SV ON KH.MaKH = SV.MaKH
+WHERE SV.Phai = 1
+GROUP BY KH.MaKH, KH.TenKH
+ORDER BY COUNT(SV.MaSV) DESC
+GO
+
+--17.
+SELECT KH.MaKH, KH.TenKH, COUNT(SV.MaSV) AS TongSV,
+SUM(IIF(SV.Phai=1, 1, 0)) AS TongNu
+FROM SinhVien SV
+JOIN Khoa KH ON KH.MaKH = SV.MaKH
+GROUP BY KH.MaKH, KH.TenKH
+GO
+
+--18
+SELECT CONCAT(SV.HoSV, ' ', SV.TenSV) AS HoTen, KH.TenKH,
+IIF(KQ.Diem<4, N'Trượt', N'Đậu') AS KetQua
+FROM SinhVien SV
+JOIN Ketqua KQ ON KQ.MaSV = SV.MaSV
+JOIN Khoa KH ON KH.MaKH = SV.MaKH
+GO
+
+--19.
+SELECT CONCAT(SV.HoSV, ' ', SV.TenSV) AS HoTen, KH.TenKH,
+IIF(SV.Phai=0, N'Nam', N'Nứ') AS Phai
+FROM SinhVien SV
+JOIN Khoa KH ON KH.MaKH = SV.MaKH
+WHERE SV.MaSV NOT IN (SELECT MaSV FROM Ketqua WHERE Diem<4)
+GO
+
+--20
+SELECT MaMH, TenMH FROM MonHoc
+WHERE MaMH NOT IN (SELECT MaMH FROM Ketqua WHERE Diem<4)
+GO
+
+--21.
+SELECT MaKH, TenKH FROM Khoa
+WHERE MaKH NOT IN (SELECT MaKH FROM SinhVien SV
+					JOIN Ketqua KQ ON KQ.MaSV = SV.MaSV
+					WHERE KQ.Diem<5)
+GO
+
+--22.
+SELECT MH.MaMH, MH.TenMH,
+SUM(IIF(KQ.Diem<5, 1, 0)) AS TongRot,
+SUM(IIF(KQ.Diem>=5, 1, 0)) AS TongDau
+FROM MonHoc MH
+JOIN Ketqua KQ ON KQ.MaMH = MH.MaMH
+GROUP BY MH.MaMH, MH.TenMH
+GO
+
+--23.
+SELECT MaMH, TenMH FROM MonHoc
+WHERE MaMH NOT IN (SELECT MH.MaMH FROM Ketqua KQ
+					JOIN MonHoc MH ON MH.MaMH = KQ.MaMH
+					WHERE Diem < 5)
+GO
+
+--24.
+SELECT MaSV, CONCAT(HoSV, ' ', TenSV) AS HoTen, MaKH
+FROM SinhVien 
+WHERE MaSV NOT IN (SELECT SV.MaSV FROM Ketqua KQ
+					JOIN SinhVien SV ON SV.MaSV = KQ.MaSV
+					WHERE Diem < 5)
+GO
+
+--25.
+SELECT SV.MaSV, CONCAT(SV.HoSV, ' ', SV.TenSV) AS HoTen, SV.MaKH 
+FROM SinhVien SV
+JOIN Ketqua KQ ON SV.MaSV = KQ.MaSV
+WHERE KQ.Diem < 5
+GROUP BY SV.MaSV, CONCAT(SV.HoSV, ' ', SV.TenSV), SV.MaKH
+HAVING COUNT(KQ.MaMH) > 2
+GO
+
+--26.
+SELECT KH.MaKH, KH.TenKH, COUNT(SV.MaSV) AS TongSV
+FROM Khoa KH
+JOIN SinhVien SV ON SV.MaKH = KH.MaKH
+GROUP BY KH.MaKH, KH.TenKH
+HAVING COUNT(SV.MaSV) > 10
+GO
+
+--27.
+SELECT SV.MaSV, CONCAT(SV.HoSV, ' ', SV.TenSV) AS HoTen, COUNT(KQ.MaMH) AS MonThi
+FROM SinhVien SV
+JOIN Ketqua KQ ON KQ.MaSV = SV.MaSV
+GROUP BY SV.MaSV, CONCAT(SV.HoSV, ' ', SV.TenSV)
+HAVING COUNT(KQ.MaMH) > 4
+GO
+
+--28.
+SELECT KH.MaKH, KH.TenKH,
+COUNT(SV.MaSV) AS TongNam
+FROM Khoa KH
+JOIN SinhVien SV ON SV.MaKH = KH.MaKH
+WHERE SV.Phai = 0
+GROUP BY KH.MaKH, KH.TenKH
+HAVING COUNT(SV.MaSV) > 5
+GO
+
+--29.
+SELECT CONCAT(SV.HoSV, ' ', SV.TenSV) AS HoTen, KH.TenKH, 
+IIF(SV.Phai=0, N'Nam', N'Nứ') AS Phai, AVG(KQ.Diem) AS DiemTB
+FROM SinhVien SV
+JOIN Khoa KH ON KH.MaKH = SV.MaKH
+JOIN Ketqua KQ ON KQ.MaSV = SV.MaSV
+GROUP BY CONCAT(SV.HoSV, ' ', SV.TenSV),  KH.TenKH, IIF(SV.Phai=0, N'Nam', N'Nứ')
+HAVING AVG(KQ.Diem) > 4
+GO
+
+--30.
+SELECT MH.MaMH, MH.TenMH, AVG(KQ.Diem) AS DiemTB FROM Ketqua KQ
+JOIN MonHoc MH ON MH.MaMH = KQ.MaMH
+GROUP BY MH.MaMH, MH.TenMH
+HAVING AVG(KQ.Diem) > 6
+GO
+
+--Bài 4
+--1.
+DECLARE @TenKH NVARCHAR(50)
+SET @TenKH = N'anh%'
+SELECT MaSV, HoSV + N' ' + TenSV AS N'Họ và tên',
+IIF(Phai=0, N'Nam', N'Nữ') AS N'Phái', TenKH
+FROM SinhVien SV
+JOIN Khoa KH ON SV.MaKH = KH.MaKH
+WHERE TenKH LIKE @TenKH
+GO
+
+--2.
+DECLARE @Diem REAL
+SET @Diem = 5.0
+SELECT SV.MaSV, SV.HoSV + N' ' + SV.TenSV AS HoTen, MH.TenMH, KQ.Diem 
+FROM Ketqua KQ
+JOIN SinhVien SV ON SV.MaSV = KQ.MaSV
+JOIN MonHoc MH ON MH.MaMH = KQ.MaMH
+WHERE MH.TenMH = N'cơ sở dữ liệu' AND KQ.Diem > @Diem
+GO
+
+--3.
+DECLARE @TenMH NVARCHAR(50)
+SET @TenMH = N'đồ họa ứng dụng'
+SELECT SV.MaSV, KH.TenKH, MH.TenMH, KQ.Diem 
+FROM Ketqua KQ
+JOIN SinhVien SV ON SV.MaSV = KQ.MaSV
+JOIN Khoa KH ON KH.MaKH = SV.MaKH
+JOIN MonHoc MH ON MH.MaMH = KQ.MaMH
+WHERE MH.TenMH = @TenMH
+GO
+
+--Bài 5
+--1.
+SELECT MaSV, MaKH, IIF(Phai=0, N'Nam', N'Nữ') AS N'Phái'
+FROM SinhVien
+WHERE MaSV NOT IN (SELECT DISTINCT MaSV FROM Ketqua)
+GO
+
+--2.
+SELECT SV.MaSV, SV.HoSV + ' ' + SV.TenSV AS HoTen, SV.MaKH
+FROM SinhVien SV
+<<<<<<< Updated upstream
+WHERE SV.MaSV NOT IN (SELECT MaSV FROM Ketqua
+        WHERE MaMH = (SELECT MaMH FROM MonHoc WHERE TenMH = N'cơ sở dữ liệu')
+    );
+GO
+
+--3.
+SELECT MaMH, TenMH, Sotiet 
+FROM MonHoc
+WHERE MaMH NOT IN (SELECT MaMH FROM Ketqua)
+=======
+WHERE SV.MaSV NOT IN (SELECT DISTINCT MaSV FROM Ketqua
+        WHERE MaMH = (SELECT MaMH FROM MonHoc WHERE TenMH = N'cơ sở dữ liệu')
+    )
+GO
+
+--Chữa
+SELECT SV.MaSV, SV.HoSV + ' ' + SV.TenSV AS HoTen, SV.MaKH
+FROM SinhVien SV
+WHERE SV.MaSV NOT IN (SELECT DISTINCT MaSV FROM Ketqua
+		JOIN MonHoc ON Ketqua.MaMH = MonHoc.MaMH
+        WHERE MonHoc.MaMH = (SELECT MaMH FROM MonHoc WHERE TenMH = N'cơ sở dữ liệu')
+    )
+GO
+
+--3.
+SELECT * 
+FROM MonHoc
+WHERE MaMH NOT IN (SELECT DISTINCT MaMH FROM Ketqua)
+>>>>>>> Stashed changes
+GO
+
+--4.
+SELECT * FROM KHOA
+WHERE MaKH NOT IN (SELECT MaKH FROM SinhVien)
+GO
+
+--5.
+SELECT * FROM SinhVien
+WHERE MaKH LIKE 'AV' AND
+<<<<<<< Updated upstream
+MaSV NOT IN (SELECT MaSV FROM Ketqua
+			WHERE MaMH = N'cơ sở dữ liệu')
+=======
+MaSV NOT IN (SELECT MaSV FROM Ketqua KQ
+			JOIN MonHoc MH ON MH.MaMH = KQ.MaMH
+			WHERE MH.TenMH = N'cơ sở dữ liệu')
+>>>>>>> Stashed changes
+GO
+
+--6.
+SELECT * FROM MonHoc
+WHERE MaMH NOT IN (SELECT MaMH FROM Ketqua KQ
+					JOIN SinhVien SV ON SV.MaSV = KQ.MaSV
+<<<<<<< Updated upstream
+					WHERE MaKH = N'TH')
+=======
+					WHERE MaKH = N'KT')
+>>>>>>> Stashed changes
+GO
+
+--7.
+SELECT * FROM SinhVien SV
+JOIN Ketqua KQ ON KQ.MaSV = SV.MaSV
+JOIN MonHoc MH ON MH.MaMH = KQ.MaMH
+WHERE MH.TenMH = N'đồ họa ứng dụng'
+<<<<<<< Updated upstream
+AND KQ.Diem < (
+        SELECT MIN(KQ.Diem)
+        FROM Ketqua KQ
+=======
+AND KQ.Diem < (SELECT MIN(KQ.Diem) FROM Ketqua KQ
+>>>>>>> Stashed changes
+        JOIN SinhVien SV ON SV.MaSV = KQ.MaSV
+        JOIN MonHoc MH ON MH.MaMH = KQ.MaMH
+        WHERE SV.MaKH = N'TH' AND MH.TenMH = N'đồ họa ứng dụng'
+    )
+GO
+
+--8.
+SELECT * FROM SinhVien
+WHERE NgaySinh > (SELECT MAX(NgaySinh) FROM SinhVien
+					WHERE MaKH = N'AV')
+GO
+
+<<<<<<< Updated upstream
+=======
+--Chữa
+
+
+>>>>>>> Stashed changes
+--9.
+SELECT * FROM SinhVien
+WHERE HocBong > (SELECT SUM(HocBong) FROM SinhVien
+					WHERE MaKH = 'TR')
+GO
+
+--10.
+SELECT * FROM SinhVien
+WHERE NoiSinh = (SELECT TOP(1) NoiSinh FROM SinhVien
+<<<<<<< Updated upstream
+					WHERE MaKH = 'AV'
+=======
+					WHERE MaKH = 'TH'
+>>>>>>> Stashed changes
+					ORDER BY HocBong DESC)
+GO
+
+--11.
+<<<<<<< Updated upstream
+SELECT SV.MaSV, CONCAT(SV.HoSV, ' ', SV.TenSV) AS HoTen, MH.TenMH, KQ.Diem
+=======
+SELECT TOP(1) WITH TIES SV.MaSV, CONCAT(SV.HoSV, ' ', SV.TenSV) AS HoTen, MH.TenMH, KQ.Diem
+>>>>>>> Stashed changes
+FROM Ketqua KQ
+JOIN SinhVien SV ON SV.MaSV = KQ.MaSV
+JOIN MonHoc MH ON MH.MaMH = KQ.MaMH
+WHERE KQ.Diem IN (SELECT MAX(Diem) FROM Ketqua
+				GROUP BY MaMH)
+ORDER BY KQ.Diem DESC
+GO
+
+--12.
+SELECT SV.MaSV, CONCAT(SV.HoSV, ' ', SV.TenSV) AS HoTen, KH.TenKH,
+MAX(SV.HocBong) AS HocBongMax
+FROM SinhVien SV
+JOIN Khoa KH ON KH.MaKH = SV.MaKH
+GROUP BY SV.MaSV, CONCAT(SV.HoSV, ' ', SV.TenSV), KH.TenKH
+GO
+
+--Bài 6
+--1.
+INSERT INTO SinhVien (MaSV, HoSV, TenSV, Phai, NgaySinh, NoiSinh, MaKH, HocBong) VALUES
+(N'C02', N'Lê Thành', N'Nguyên', 0, N'1980-10-20', N'Tp.HCM', 'TH', 850000)
+GO
+
+--2.
+INSERT INTO MonHoc (MaMH, TenMH, Sotiet) VALUES
+('10', N'Xử lí ảnh', 45)
+GO
+
+--3.
+INSERT INTO Khoa (MaKH, TenKH) VALUES
+('CT', N'Công trình')
+GO
+
+--4.
+INSERT INTO SinhVien(MaSV, HoSV, TenSV, Phai, NgaySinh, NoiSinh, MaKH, HocBong) VALUES
+('C04', N'Nguyễn Trần', N'Quân', 0, GETDATE(), N'Huế', 'CT', 950000)
+GO
+
+--5.
+INSERT INTO Ketqua(MaSV, MaMH, Diem)
+SELECT MaSV, N'06', 7.0 FROM SinhVien
+WHERE MaKH LIKE 'TH' AND 
+MaSV NOT IN (SELECT MaSV FROM Ketqua WHERE MaMH = N'06')
+GO
+
+--6.
+INSERT INTO Ketqua(MaSV, MaMH, Diem)
+SELECT 'C02', MaMH, 8.0 FROM MonHoc
+WHERE MaMH NOT IN (SELECT MaMH FROM dbo.Ketqua 
+					WHERE MaSV = 'C02')
+GO
+
+--Bài 7
+--1.
+SELECT SV.MaSV,
+    CONCAT(SV.HoSV, ' ', SV.TenSV) AS HoTen,
+    IIF(SV.Phai=0, N'Nam', N'Nữ') AS Phai,
+    SV.NgaySinh, SV.NoiSinh, KH.TenKH, SV.HocBong
+INTO DeleteTable
+FROM SinhVien SV
+JOIN Khoa KH ON KH.MaKH = SV.MaKH
+GO
+
+--2.
+DELETE FROM DeleteTable
+WHERE HocBong IS NULL OR HocBong=0
+GO
+
+--3.
+DELETE FROM DeleteTable
+WHERE NgaySinh = '1987-12-20'
+GO
+
+--4.
+DELETE FROM DeleteTable
+WHERE NgaySinh < '1987-03-01'
+GO
+
+--5.
+DELETE FROM DeleteTable
+WHERE Phai = N'Nam' AND TenKH = N'Tin học'
+GO
+
+--Bài 8
+--1.
+UPDATE MonHoc
+SET Sotiet = 45
+WHERE TenMH = N'Tiếng Anh cơ bản'
+GO
+
+--2.
+UPDATE SinhVien
+SET TenSV = N'Kỳ'
+WHERE HoSV = N'Trần Thị' AND TenSV = N'Mai';
+GO
+
+--3.
+UPDATE SinhVien
+SET Phai = 0
+WHERE HoSV = N'Trần Thị' AND TenSV = N'Kỳ'
+GO
+
+--4.
+UPDATE SinhVien
+SET NgaySinh = '1990-07-05'
+WHERE HoSV = N'Trần Thị Thu' AND TenSV = N'Thủy'
+GO
+
+--5.
+UPDATE SinhVien
+SET HocBong = HocBong + 100000
+WHERE MaKH = N'AV'
+GO
+
+--6.
+UPDATE KQ
+SET Diem = CASE
+    WHEN kq.Diem + 5 > 10 THEN 10.0 
+    ELSE kq.Diem + 5          
+END
+FROM Ketqua KQ
+JOIN SinhVien SV ON SV.MaSV = KQ.MaSV
+JOIN MonHoc MH ON MH.MaMH = KQ.MaMH
+WHERE SV.MaKH = 'AV' AND MH.MaMH = '02'
+GO
+
+--7.
+UPDATE SinhVien
+SET HocBong = HocBong +
+    CASE
+        WHEN Phai = 1 AND MaKH = N'AV' THEN 100000
+        WHEN Phai = 0 AND MaKH = N'TH' THEN 150000
+    ELSE 50000 END
+WHERE
+    HocBong IS NOT NULL
+GO
+
+--8.
+UPDATE KQ
+SET Diem = CASE
+        WHEN SV.MaKH = 'AV' THEN
+            CASE
+                WHEN KQ.Diem + 2 > 10 THEN 10.0
+                ELSE KQ.Diem + 2
+            END
+        WHEN SV.MaKH = 'TH' THEN
+            CASE
+                WHEN KQ.Diem - 1 < 0 THEN 0.0
+                ELSE KQ.Diem - 1
+            END
+        ELSE KQ.Diem
+    END
+FROM Ketqua KQ
+JOIN SinhVien SV ON SV.MaSV = KQ.MaSV
+WHERE KQ.MaMH = '01'
+<<<<<<< Updated upstream
+GO
+=======
+GO
+>>>>>>> Stashed changes
